@@ -1,0 +1,47 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      # .env is gitignored, so CI needs its own copy. Add real values as
+      # repo secrets and write them out here once you have some, e.g.:
+      #   run: echo "SOME_API_KEY=${{ secrets.SOME_API_KEY }}" >> .env
+      - name: Create placeholder .env
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  # Uncomment once you're ready to produce real build artifacts.
+  # build_android:
+  #   needs: analyze_and_test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: '3.24.0'
+  #         channel: 'stable'
+  #     - run: cp .env.example .env
+  #     - run: flutter pub get
+  #     - run: flutter build apk --release

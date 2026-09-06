@@ -1,0 +1,50 @@
+name: app_boilerplate
+description: "A production-ready Flutter starting point: Riverpod, go_router, Firebase."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State management ---
+  flutter_riverpod: ^2.5.1
+
+  # --- Navigation ---
+  go_router: ^14.2.0
+
+  # --- Firebase (backend) ---
+  firebase_core: ^3.3.0
+  firebase_auth: ^5.1.4
+  cloud_firestore: ^5.2.1
+
+  # --- Config / secrets ---
+  flutter_dotenv: ^5.1.0
+
+  # --- UI polish ---
+  google_fonts: ^6.2.1
+  cupertino_icons: ^1.0.8
+
+  # --- Utilities ---
+  logger: ^2.4.0
+  shared_preferences: ^2.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/images/
+
+  # fonts:
+  #   - family: YourCustomFont
+  #     fonts:
+  #       - asset: assets/fonts/YourCustomFont-Regular.ttf
