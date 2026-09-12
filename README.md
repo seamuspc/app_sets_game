@@ -115,6 +115,82 @@ get redirected to the home screen.
 | `flutter build apk --release` | Build a release Android APK |
 | `flutter build ios --release` | Build a release iOS build (needs Xcode + a Mac) |
 
+## Multiplayer: platform permissions required
+
+Both the Bluetooth and WiFi transport modes need explicit native platform
+permissions declared, or they'll silently fail (Bluetooth) or get
+rejected by the OS (WiFi local network access on iOS 14+). Add these to
+your real Flutter project (they can't live in this boilerplate's `lib/`
+folder, since `ios/`/`android/` only exist once you've run `flutter
+create` — see the setup steps above).
+
+### iOS — `ios/Runner/Info.plist`
+
+```xml
+<key>NSBluetoothAlwaysUsageDescription</key>
+<string>This app uses Bluetooth to connect nearby players for multiplayer games.</string>
+<key>NSBluetoothPeripheralUsageDescription</key>
+<string>This app uses Bluetooth to host multiplayer games for nearby players.</string>
+
+<!-- Required for WiFi mode's local-network discovery (UDP broadcast) -->
+<key>NSLocalNetworkUsageDescription</key>
+<string>This app uses your local network to find nearby players for multiplayer games.</string>
+<key>NSBonjourServices</key>
+<array>
+  <string>_setgame._tcp</string>
+</array>
+```
+
+Also enable these background modes if you want an already-connected BLE
+session to survive brief backgrounding (see the design discussion on
+reconnect handling): Xcode → Runner target → Signing & Capabilities →
+Background Modes → check **Uses Bluetooth LE accessories** and **Acts
+as a Bluetooth LE accessory**.
+
+### Android — `android/app/src/main/AndroidManifest.xml`
+
+```xml
+<!-- Android 12+ (API 31+) -->
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+<!-- Android 6-11 needs location permission for BLE scan results -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+<!-- Android 11 and lower -->
+<uses-permission android:name="android.permission.BLUETOOTH" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+<!-- WiFi mode: local network sockets -->
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+```
+
+The app should call `requestPermissions()` (already wired into
+`BleGameTransport`) before scanning, connecting, or advertising — but
+these manifest/plist entries are what make the runtime prompts possible
+in the first place.
+
+## Multiplayer: what's built vs. what's next
+
+**Built:** the transport-agnostic message protocol
+(`domain/multiplayer/game_message.dart`), a `GameTransport` interface
+that Bluetooth (real BLE GATT central+peripheral) and WiFi (real TCP/UDP
+sockets) both implement, and a working Lobby screen (Host/Join tabs)
+that actually starts hosting/discovering/connecting and shows a live
+waiting-room list as players join.
+
+**Not yet built:** the actual multiplayer game — right now "Start game"
+in the Lobby is a stub. The next step is a host-authoritative game
+controller that takes over the connection the Lobby opened
+(`lobbyControllerProvider.notifier.activeTransport`), validates
+`ClaimAttempt`s from clients, resolves the "simultaneous claim = draw"
+rule, and broadcasts `CardsReplaced`/`GameStateSnapshot` — wiring the
+message protocol into the actual SET board instead of just the lobby
+roster.
+
 ## Path to the App Store (high level — we'll go step by step when you're ready)
 
 1. Get an Apple Developer account ($99/yr) and a Google Play Developer

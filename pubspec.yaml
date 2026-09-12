@@ -21,6 +21,9 @@ dependencies:
   firebase_auth: ^5.1.4
   cloud_firestore: ^5.2.1
 
+  # --- Multiplayer: Bluetooth transport ---
+  flutter_bluetooth_plugin: ^2.0.0
+
   # --- Config / secrets ---
   flutter_dotenv: ^5.1.0
 

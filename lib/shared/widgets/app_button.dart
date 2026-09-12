@@ -26,7 +26,7 @@ class AppButton extends StatelessWidget {
               width: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: Color.fromARGB(255, 65, 48, 48),
+                color: Colors.white,
               ),
             )
           : Text(label),

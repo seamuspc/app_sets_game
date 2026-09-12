@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -5,6 +6,8 @@ import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/sets_game/presentation/screens/lobby_screen.dart';
+import '../../features/sets_game/presentation/screens/sets_game_screen.dart';
 
 /// Route path constants — reference these instead of typing raw strings,
 /// so a typo becomes a compile error instead of a silent broken nav.
@@ -14,7 +17,15 @@ class AppRoutes {
   static const signIn = '/sign-in';
   static const home = '/';
   static const settings = '/settings';
+  static const game = '/game';
+  static const lobby = '/lobby';
 }
+
+/// Set this to false at any time to re-enable the sign-in gate while
+/// still in debug mode. This flag has NO effect on release builds
+/// (kDebugMode is always false there) — it can never accidentally ship
+/// with auth disabled.
+const bool skipAuthGateInDebug = true;
 
 /// The app's router, exposed as a Riverpod provider so it can react to
 /// auth state changes (see `redirect` below) without manual listeners.
@@ -28,6 +39,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: AppRoutes.home,
     debugLogDiagnostics: true,
     redirect: (context, state) {
+      if (kDebugMode && skipAuthGateInDebug) return null;
+
       // Still waiting on Firebase's first auth event (e.g. cold start) —
       // don't redirect yet, or you'll flash the sign-in screen every launch.
       if (authState.isLoading) return null;
@@ -58,6 +71,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.game,
+        builder: (context, state) => const SetsGameScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.lobby,
+        builder: (context, state) => const LobbyScreen(),
       ),
     ],
   );

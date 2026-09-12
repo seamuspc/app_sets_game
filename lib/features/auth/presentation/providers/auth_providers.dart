@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/app_logger.dart';
 import '../../data/auth_repository.dart';
 
 /// Provides the single AuthRepository instance used app-wide.
@@ -31,6 +32,9 @@ class AuthController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(
       () => ref.read(authRepositoryProvider).signInWithEmail(email, password),
     );
+    if (state.hasError) {
+      appLogger.e('Sign-in failed: ${state.error}');
+    }
   }
 
   Future<void> signUp(String email, String password) async {
